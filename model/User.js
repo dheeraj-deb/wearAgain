@@ -3,12 +3,15 @@ const crypto = require('crypto');
 const db = require('../util/database');
 const collection = require('../util/collection').collection;
 const objectId = require('mongodb').ObjectId
+const client = require('twilio')('AC19fa060e5047f5af9b81450edc56838b', 'e467d276e91f7c076dc84ebdfd89ac37')
+const sericeSid  = 'MG2498a2ee28acf16fcb06163119935fc8';
 
 
 
 
 
 let userFound = false;
+
 
 
 function getUser(userData) {
@@ -46,6 +49,36 @@ exports.getAllUsers = () => {
         }
     })
 }
+
+
+
+// otp verification
+
+// exports.doSms = (data)=>{
+//     return new Promise((resolve, reject) => {
+//         client.verify.services(sericeSid).verifications.create({
+//             to:`+91${data.mobile}`,
+//             channel:"sms"
+//         }).then((response)=>{
+//             if(response){
+//                 resolve(response)
+//             }
+//             resolve()
+//         })
+//     })
+// }
+
+// exports.verityOtp =(otp, data) => {
+//     return new Promise((resolve, reject) => {
+//         client.verify.services(sericeSid).verificationChecks.create({
+//             to:`+91${data.phone}`,
+//             code:otp.otp
+//         }).then((response)=>{
+//             console.log("response");
+//             resolve(response)
+//         })
+//     })
+// }
 
 exports.userSignUp = (userData) => {
     return new Promise((resolve, reject) => {

@@ -51,9 +51,9 @@
                                             <select class="form-select" id="exampleFormControlSelect1" name="category"
                                                 aria-label="Default select example">
                                                 <option selected>Open this select menu</option>
-                                                <option value="men's">Men's</option>
-                                                <option value="women's">Women's</option>
-                                                <option value="kids">kids</option>
+                                                {{#each category}}
+                                                <option value="{{this._id}}">{{this.category}}</option>
+                                                {{/each}}
                                             </select>
                                         </div>
 
@@ -116,8 +116,8 @@
                                         {{!----------------- --}}
 
                                         <div class="mb-3 mt-4">
-                                            <div class="file-drop-area">
 
+                                            <div class="file-drop-area">
                                                 <span class="choose-file-button">Choose Files</span>
                                                 <span class="file-message">or drag and drop files here</span>
                                                 <input type="file" class="file-input" name="image"

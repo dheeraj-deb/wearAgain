@@ -12,7 +12,20 @@ exports.getAdmin = (req, res) => {
 }
 
 exports.getaddProduct = (req, res) => {
-    res.render('admin/add-product', { admin: true, layout: "admin_layout", menuActive: true, addProduct: true, errorMessage: req.flash('error')})
+    product.getCategory().then((category) => {
+        if (category) {
+            return res.render('admin/add-product', {
+                admin: true, layout: "admin_layout",
+                menuActive: true,
+                addProduct: true,
+                errorMessage: req.flash('error'),
+                category:category
+            })
+        }
+        // handle error
+        res.redirect('/admin/product')
+    })
+
 }
 
 exports.addProduct = (req, res) => {
@@ -32,7 +45,6 @@ exports.addProduct = (req, res) => {
 
 exports.getProduct = (req, res) => {
     product.getAllProduct().then((products) => {
-        console.log("response", products);
         res.render('admin/products', { admin: true, layout: "admin_layout", productsActive: true, product: products })
     })
 }
@@ -47,13 +59,19 @@ exports.deleteProduct = (req, res) => {
 }
 
 exports.getEditProduct = (req, res) => {
-    product.getProduct(req.params).then((product) => {
+    product.getProduct(req.params).then((prod) => {
         if (product) {
-            return res.render('admin/edit-product', {
-                layout: "admin_layout",
-                editProd: true,
-                productsActive: true,
-                product: product
+            return product.getCategory().then((category) => {
+                console.log((category));
+                if (category) {
+                    return res.render('admin/edit-product', {
+                        layout: "admin_layout",
+                        editProd: true,
+                        productsActive: true,
+                        product: prod,
+                        category:category
+                    })
+                }
             })
         }
     })
@@ -66,11 +84,11 @@ exports.updateProduct = (req, res) => {
         img.push(element.filename)
     });
     req.body.img_id = img
-    product.editProduct(req.body, req.params.id).then((response)=>{
+    product.editProduct(req.body, req.params.id).then((response) => {
         console.log(req.files);
-        if(response){
+        if (response) {
             res.redirect('/admin/product')
-            
+
         }
     })
 }
@@ -78,9 +96,9 @@ exports.updateProduct = (req, res) => {
 
 
 exports.getUser = (req, res) => {
-    user.getAllUsers().then((users)=>{
-        if(users){
-            return res.render('admin/manage-user', {layout:'admin_layout', manageUser:true, user:users})
+    user.getAllUsers().then((users) => {
+        if (users) {
+            return res.render('admin/manage-user', { layout: 'admin_layout', manageUser: true, user: users })
         }
     })
 }
@@ -88,19 +106,19 @@ exports.getUser = (req, res) => {
 
 
 exports.blockUser = (req, res) => {
-    user.blockUser(req.params.id).then((response)=>{
+    user.blockUser(req.params.id).then((response) => {
         res.redirect('/admin/manage-user')
     })
 }
 
 exports.unblockUser = (req, res) => {
-    user.unblockUser(req.params.id).then((response)=>{
+    user.unblockUser(req.params.id).then((response) => {
         res.redirect('/admin/manage-user')
     })
 }
 
 exports.deleteUser = (req, res) => {
-    user.deleteUser(req.params).then(()=>{
+    user.deleteUser(req.params).then(() => {
         res.redirect('/admin/manage-user')
     })
 }

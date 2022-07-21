@@ -12,7 +12,11 @@ router.get('/products', controller.getProducts);
 
 // filter
 router.post('/all-products', controller.getallProducts);
-router.post('/product-women', controller.filterWomen);
 
+router.post('/filter-category', controller.filterCategory);
+
+// product overview
+
+router.post('/product_details/:id', controller.productDetails)
 
 module.exports = router;

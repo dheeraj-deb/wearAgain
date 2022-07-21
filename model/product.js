@@ -2,10 +2,20 @@ const db = require('../util/database');
 const collection = require('../util/collection').collection;
 const objectId = require('mongodb').ObjectId;
 
+exports.findProductById = (productId) => {
+    return new Promise(async (resolve, reject) => {
+        const product = await db.get().collection(collection.PRODUCT_COLLECTIION).findOne({_id:objectId(productId)})
+        if(product){
+            return resolve(product)
+        }
+        resolve()
+    })
+}
 
 exports.addProduct = (product) => {
     product.tags = product.tags.split(',')
-    console.log(product.files)
+    product.category = objectId(product.category)
+    console.log(product);
     return new Promise((resolve, reject) => {
         db.get().collection(collection.PRODUCT_COLLECTIION).insertOne(product).then((response) => {
             resolve(response)
@@ -16,18 +26,36 @@ exports.addProduct = (product) => {
 }
 
 
-exports.getAllProduct = (callback) => {
+exports.getAllProduct = () => {
     return new Promise(async (resolve, reject) => {
-        const products = await db.get().collection(collection.PRODUCT_COLLECTIION).find().toArray()
-        if (products) {
-            return resolve(products)
+        try {
+            const products = await db.get().collection(collection.PRODUCT_COLLECTIION).aggregate(
+                [
+                    {
+                        $lookup: {
+                            from: "category",
+                            localField: "category",
+                            foreignField: "_id",
+                            as: "lookup_category"
+                        }
+                    }
+                ]
+            ).toArray();
+            if (products) {
+                return resolve(products)
+            }
+            resolve()
+        } catch (error) {
+            reject(error)
         }
-        resolve()
-    }).catch((err) => {
-
     })
 }
 
+// const products = await db.get().collection(collection.PRODUCT_COLLECTIION).find().toArray()
+//         if (products) {
+//             return resolve(products)
+//         }
+//         resolve()
 
 exports.deleteProduct = (id) => {
     return new Promise((resolve, reject) => {
@@ -59,6 +87,7 @@ exports.getProduct = (id) => {
 
 
 exports.editProduct = (productDtls, id) => {
+    productDtls.category = objectId(productDtls.category)
     return new Promise((resolve, reject) => {
         db.get().collection(collection.PRODUCT_COLLECTIION).updateOne({ _id: objectId(id) }, {
             $set: {
@@ -88,12 +117,43 @@ exports.editProduct = (productDtls, id) => {
 }
 
 
-exports.filterWomen = () => {
+exports.filterCategory = (filter) => {
     return new Promise(async (resolve, reject) => {
         try {
-            products = await db.get().collection(collection.PRODUCT_COLLECTIION).find({ category: "women's" }).toArray()
+            const products = await db.get().collection(collection.PRODUCT_COLLECTIION).aggregate(
+                [
+                    {
+                        $lookup:{
+                            from:"category",
+                            localField:"category",
+                            foreignField:"_id",
+                            as:"lookup_category"
+                        }
+                    }
+                ]
+            ).toArray()
+            const filterProducts = products.filter((prods)=>{
+                return prods.lookup_category[0].category === filter
+            })
+            // products = await db.get().collection(collection.PRODUCT_COLLECTIION).find({ category: filter }).toArray()
             if (products) {
-                return resolve(products)
+                // console.log("filter", filterProducts);
+                return resolve(filterProducts)
+            }
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+
+exports.getCategory = (req, res) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const category = await db.get().collection(collection.CATEGORY).find().toArray();
+            if (category) {
+                return resolve(category)
             }
             resolve()
         } catch (error) {

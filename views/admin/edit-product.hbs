@@ -49,12 +49,14 @@
                                             <select class="form-select" id="exampleFormControlSelect1" name="category"
                                                 aria-label="Default select example">
                                                 <option selected>Default</option>
+                                                {{!-- {{#each category}} --}}
                                                 <option {{#when product.category 'eq' "men's" }}selected{{/when}}
-                                                    value="men's">Men's</option>
+                                                    value="{{category.[0]._id}}">{{category.[0].category}}</option>
                                                 <option {{#when product.category 'eq' "women's" }}selected{{/when}}
-                                                    value="women's">Women's</option>
+                                                    value="{{category.[1]._id}}">{{category.[1].category}}</option>
                                                 <option {{#when product.category 'eq' "kids" }}selected{{/when}}
-                                                    value="kids">kids</option>
+                                                    value="{{category.[2]._id}}">{{category.[2].category}}</option>
+                                                {{!-- {{/each}} --}}
                                             </select>
                                         </div>
 
