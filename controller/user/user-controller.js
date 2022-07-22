@@ -60,8 +60,27 @@ exports.productDetails = (req, res) => {
     const productId = req.params.id;
     product.findProductById(productId).then((prod)=>{
         if(prod){
-           return res.render()
+           return res.render('user/product-details', {product:prod, layout:"user-layout", user:true})
         }
         
     })
+}
+
+// check session !imp
+
+exports.addToCart = (req, res) => {
+    product.addtoCart(req.params.id, req.session.user._id).then((response)=>{
+        if(response){
+            res.redirect('/cart')
+        }
+        console.log(response);
+    })
+}
+
+exports.getCart = async (req, res) =>{
+    const products = await product.getCartItems(req.session.user._id)
+    if(products){
+        console.log("products", products);
+        res.render('user/cart', {layout:"user-layout", user:true, products})
+    }
 }

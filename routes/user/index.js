@@ -17,6 +17,13 @@ router.post('/filter-category', controller.filterCategory);
 
 // product overview
 
-router.post('/product_details/:id', controller.productDetails)
+router.get('/product_details/:id', controller.productDetails);
+
+// cart
+
+router.get('/cart', controller.getCart)
+
+router.post('/add-to-cart/:id', controller.addToCart)
+
 
 module.exports = router;

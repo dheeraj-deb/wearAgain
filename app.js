@@ -33,24 +33,26 @@ const store = new MongoDbStore({
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
-app.engine('hbs', hbs.engine({helpers:{
-  inc:function(value, options){
-    return parseInt(value)+1
-  }
-},extname: 'hbs', defaultLayout: '', layoutsDir: __dirname + '/views/layout', partialsDir: __dirname + '/views/partials' }));
-handlebars.registerHelper( "when",function(operand_1, operator, operand_2, options) {
+app.engine('hbs', hbs.engine({
+  helpers: {
+    inc: function (value, options) {
+      return parseInt(value) + 1
+    }
+  }, extname: 'hbs', defaultLayout: false, layoutsDir: __dirname + '/views/layout', partialsDir: __dirname + '/views/partials'
+}));
+handlebars.registerHelper("when", function (operand_1, operator, operand_2, options) {
   var operators = {
-   'eq': function(l,r) { return l == r; },
-   'noteq': function(l,r) { return l != r; },
-   'gt': function(l,r) { return Number(l) > Number(r); },
-   'or': function(l,r) { return l || r; },
-   'and': function(l,r) { return l && r; },
-   '%': function(l,r) { return (l % r) === 0; }
+    'eq': function (l, r) { return l == r; },
+    'noteq': function (l, r) { return l != r; },
+    'gt': function (l, r) { return Number(l) > Number(r); },
+    'or': function (l, r) { return l || r; },
+    'and': function (l, r) { return l && r; },
+    '%': function (l, r) { return (l % r) === 0; }
   }
-  , result = operators[operator](operand_1,operand_2);
+    , result = operators[operator](operand_1, operand_2);
 
   if (result) return options.fn(this);
-  else  return options.inverse(this);
+  else return options.inverse(this);
 });
 
 // app.use(multer())

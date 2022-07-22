@@ -4,8 +4,8 @@ const objectId = require('mongodb').ObjectId;
 
 exports.findProductById = (productId) => {
     return new Promise(async (resolve, reject) => {
-        const product = await db.get().collection(collection.PRODUCT_COLLECTIION).findOne({_id:objectId(productId)})
-        if(product){
+        const product = await db.get().collection(collection.PRODUCT_COLLECTIION).findOne({ _id: objectId(productId) })
+        if (product) {
             return resolve(product)
         }
         resolve()
@@ -123,16 +123,16 @@ exports.filterCategory = (filter) => {
             const products = await db.get().collection(collection.PRODUCT_COLLECTIION).aggregate(
                 [
                     {
-                        $lookup:{
-                            from:"category",
-                            localField:"category",
-                            foreignField:"_id",
-                            as:"lookup_category"
+                        $lookup: {
+                            from: collection.CART_COLLECTION,
+                            localField: "category",
+                            foreignField: "_id",
+                            as: "lookup_category"
                         }
                     }
                 ]
             ).toArray()
-            const filterProducts = products.filter((prods)=>{
+            const filterProducts = products.filter((prods) => {
                 return prods.lookup_category[0].category === filter
             })
             // products = await db.get().collection(collection.PRODUCT_COLLECTIION).find({ category: filter }).toArray()
@@ -159,5 +159,84 @@ exports.getCategory = (req, res) => {
         } catch (error) {
             reject(error)
         }
+    })
+}
+
+
+exports.addtoCart = (productId, userId) => {
+    const productObj = {
+        item:objectId(productId),
+        qty:1
+    }
+    return new Promise(async (resolve, reject) => {
+        const userCart = await db.get().collection(collection.CART_COLLECTION).findOne({ user: objectId(userId) })
+        if (userCart) {
+            const productExist = userCart.products.findIndex(product => product.item = productId)
+            if (productExist !=-1) {
+                return db.get().collection(collection.CART_COLLECTION).updateOne({'products.item':objectId(productId)},
+                {
+                    $inc:{'products.$.qty':1}
+                }
+                ).then((response)=>{
+                    resolve(response)
+                })
+            }
+            db.get().collection(collection.CART_COLLECTION).updateOne({ user: objectId(userId) }, {
+                $push: { products: productObj }
+            }).then((response) => {
+                if (response) {
+                    return resolve(response)
+                }
+                resolve()
+            })
+        } else {
+            const cartObj = {
+                user: objectId(userId),
+                products: [productObj],
+                total:0
+            }
+            db.get().collection(collection.CART_COLLECTION).insertOne(cartObj).then((response) => {
+                if (response) {
+                    return resolve(response)
+                }
+                resolve()
+            })
+        }
+    })
+}
+
+exports.getCartItems = (userId) => {
+    return new Promise(async(resolve, reject) => {
+        const cartItems = await db.get().collection(collection.CART_COLLECTION).aggregate(
+            [
+                {
+                    $match: {
+                        user: objectId(userId)
+                    }
+                },
+                {
+                    $unwind:'$products'
+                },
+                {
+                    $project:{
+                        item:'$products.item',
+                        qty:'$products.qty'
+                    }
+                },{
+                    $lookup:{
+                        from:collection.PRODUCT_COLLECTIION,
+                        localField:'item',
+                        foreignField:'_id',
+                        as:'product'
+                    }
+                }
+                
+            ]
+        ).toArray()
+        console.log(cartItems[0].product);
+        if(cartItems){
+            return resolve(cartItems)
+        }
+        resolve()
     })
 }
